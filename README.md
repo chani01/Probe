@@ -107,7 +107,7 @@ class MyApp : Application() {
         Probe.init(
             defaultTag = "Probe",
             isLoggingEnabled = BuildConfig.DEBUG,
-            logFileName = "app_logs.txt"
+            logFile = File(applicationContext.filesDir, "probe.txt")
         )
     }
 }
