@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Probe.i(name)
+    Probe.tag("ui").i("aaa")
     Text(
         text = "Hello $name!",
         modifier = modifier
