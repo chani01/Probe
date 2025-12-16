@@ -1,7 +1,6 @@
 package com.chani.probe
 
 import android.util.Log
-import com.chani.probe.internal.StackTraceUtil
 
 class ProbeLogger internal constructor(private val customTag: String) {
 
@@ -26,8 +25,7 @@ class ProbeLogger internal constructor(private val customTag: String) {
     }
 
     fun t(message: String) {
-        val stackTrace = Log.getStackTraceString(Exception(StackTraceUtil.buildMessage(message, 6)))
-        Probe.getInstance()?.log(Log.ERROR, stackTrace, customTag)
+        Probe.getInstance()?.logTrace(message, customTag)
     }
 
     fun json(jsonString: String) {
