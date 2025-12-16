@@ -20,6 +20,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "LogCatXSample"
+rootProject.name = "ProbeSample"
 include(":app")
-include(":LogCatX")
+include(":Probe")

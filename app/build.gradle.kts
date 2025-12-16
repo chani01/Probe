@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.chani.logcatxsample"
+    namespace = "com.chani.probeSample"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.chani.logcatxsample"
+        applicationId = "com.chani.probeSample"
         minSdk = 21
         targetSdk = 34
         versionCode = 1
@@ -66,5 +66,5 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-    implementation(project(":LogCatX"))
+    implementation(project(":Probe"))
 }

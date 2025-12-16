@@ -1,5 +1,5 @@
 [versions]
-loccatx = "1.0.4"
+probe = "1.0.5"
 
 agp = "8.5.2"
 kotlin = "1.9.0"
