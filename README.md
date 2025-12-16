@@ -47,7 +47,8 @@ Probe.init(
 #### Parameters
 - **`defaultTag`**: Default tag used when no custom tag is provided.
 - **`isLoggingEnabled`**: Enables or disables logging dynamically.
-- **`logFile`**: (Optional) File name for saving logs.
+- **`logFile`**: (Optional) File where logs will be written.  
+  If `null`, file logging is disabled.
 
 ---
 
