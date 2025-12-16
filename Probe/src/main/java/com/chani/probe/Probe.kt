@@ -65,7 +65,7 @@ class Probe private constructor(
         }
 
         fun t(message: String) {
-            instance?.log(Log.ERROR, Log.getStackTraceString(Exception(StackTraceUtil.buildMessage(message, 8))))
+            instance?.log(Log.DEBUG, Log.getStackTraceString(Exception(StackTraceUtil.buildMessage(message, 8))))
         }
 
         fun json(jsonString: String) {
@@ -76,7 +76,7 @@ class Probe private constructor(
 
     internal fun log(level: Int, message: String, customTag: String? = null) {
         if (isLoggingEnabled) {
-            val logMsg = StackTraceUtil.buildMessage(message = message, 8)
+            val logMsg = StackTraceUtil.buildMessage(message = message, 6)
             val logTag = customTag ?: tag
             Log.println(level, logTag, logMsg)
             logFile?.let {
@@ -106,7 +106,7 @@ class Probe private constructor(
         val formattedJson = JsonFormatter.format(jsonString)
 
         if (formattedJson != null) {
-            val callerInfo = StackTraceUtil.getCallerInfo(5)
+            val callerInfo = StackTraceUtil.getCallerInfo(6)
 
             val prefix = if (message != null) {
                 "$callerInfo $message - JSON ▼"
@@ -126,7 +126,7 @@ class Probe private constructor(
             }
         } else {
             // JSON 파싱 실패 시 원본 그대로 출력
-            val callerInfo = StackTraceUtil.getCallerInfo(5)
+            val callerInfo = StackTraceUtil.getCallerInfo(6)
             val errorMsg = "$callerInfo Invalid JSON (showing raw): $jsonString"
             Log.w(logTag, errorMsg)
             logFile?.let {
