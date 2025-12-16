@@ -65,7 +65,7 @@ class Probe private constructor(
         }
 
         fun t(message: String) {
-            instance?.log(Log.DEBUG, Log.getStackTraceString(Exception(StackTraceUtil.buildMessage(message, 8))))
+            instance?.logTrace(message, null)
         }
 
         fun json(jsonString: String) {
@@ -132,6 +132,48 @@ class Probe private constructor(
             logFile?.let {
                 writeLogToFile(errorMsg, logTag)
             }
+        }
+    }
+
+    internal fun logTrace(message: String, customTag: String? = null) {
+        if (!isLoggingEnabled) return
+
+        val logTag = customTag ?: tag
+        val stackTrace = Thread.currentThread().stackTrace
+        val sb = StringBuilder()
+
+        // 헤더
+        sb.append("📍 Call Stack:\n")
+
+        // 사용자 코드만 추출
+        stackTrace.forEach { element ->
+            val className = element.className
+            val fileName = element.fileName
+
+            // Probe 내부, 시스템, 프레임워크 제외
+            if (!className.startsWith("com.chani.probe.") &&
+                !className.startsWith("dalvik.") &&
+                !className.startsWith("java.") &&  // java.* 전체 제외
+                !className.startsWith("javax.") &&
+                !className.startsWith("android.") &&
+                !className.startsWith("androidx.") &&
+                !className.startsWith("com.android.") &&  // com.android.* 추가
+                !className.startsWith("kotlin.") &&
+                !className.startsWith("kotlinx.") &&
+                fileName != null &&
+                !fileName.endsWith(".jvm.kt")) {
+                sb.append("   → $fileName:${element.lineNumber} ${element.methodName}()\n")
+            }
+        }
+
+        sb.append("   ↳ $message")
+
+        // 로그 출력
+        Log.d(logTag, sb.toString())
+
+        // 파일에도 기록
+        logFile?.let {
+            writeLogToFile(sb.toString(), logTag)
         }
     }
 }
