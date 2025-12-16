@@ -120,7 +120,7 @@ class MyApp : Application() {
         Probe.init(
             defaultTag = "Probe",
             isLoggingEnabled = BuildConfig.DEBUG,
-            logFile = File(applicationContext.filesDir, "probe.txt")
+            logFile = null
         )
     }
 }
