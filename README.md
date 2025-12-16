@@ -77,6 +77,22 @@ If no tag is specified, the default tag is used.
 
 ---
 
+### Trace Logging
+
+Probe provides call stack–based trace logging.
+TRACE logs capture the execution path of your code by extracting
+user-level call stacks while filtering out framework and internal calls.
+
+This is especially useful for debugging complex flows
+and hard-to-reproduce issues.
+
+```kotlin
+Probe.t("Enter MainActivity")
+Probe.tag("Repository").t("Fetching data")
+```
+
+---
+
 ### JSON Logging
 
 Probe supports logging JSON content in a readable, pretty-printed format.
