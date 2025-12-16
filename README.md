@@ -105,7 +105,7 @@ class MyApp : Application() {
         super.onCreate()
 
         Probe.init(
-            defaultTag = "MyAppTag",
+            defaultTag = "Probe",
             isLoggingEnabled = BuildConfig.DEBUG,
             logFileName = "app_logs.txt"
         )
