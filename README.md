@@ -40,7 +40,7 @@ Initialize `Probe` in your `Application` class or any entry point:
 Probe.init(
     defaultTag = "MyAppTag",
     isLoggingEnabled = BuildConfig.DEBUG,
-    logFileName = "app_logs.txt" // optional
+    logFile = File(applicationContext.filesDir, filename) or null // optional
 )
 ```
 
