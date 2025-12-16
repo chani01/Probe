@@ -101,6 +101,7 @@ JSON output is automatically formatted for improved readability in Logcat.
 
 Probe writes logs using append mode.
 Logs persist across app restarts unless the file is manually cleared.
+File logging is recommended for debugging issues that cannot be reproduced locally.
 
 ```kotlin
 Probe.init(
