@@ -57,6 +57,10 @@ class Probe private constructor(
             instance?.log(Log.ERROR, Log.getStackTraceString(Exception(buildMsg(message))))
         }
 
+        fun json(jsonString: String) {
+            instance?.logJson(jsonString, null)
+        }
+
         private fun buildMsg(message: String): String {
             val ste = Thread.currentThread().stackTrace[4]
             return "${getCallerInfo()} $message"
@@ -103,6 +107,11 @@ class Probe private constructor(
             instance?.log(Log.ERROR, stackTrace, customTag)
         }
 
+        fun json(jsonString: String) {
+            instance?.logJson(jsonString, customTag)
+        }
+
+
         private fun buildMsg(message: String): String {
             return "${getCallerInfo()} $message"
         }
@@ -141,6 +150,105 @@ class Probe private constructor(
             } catch (e: Exception) {
                 Log.e(tag, "Log file write failed", e)
             }
+        }
+    }
+
+    private fun logJson(jsonString: String, customTag: String? = null, message: String? = null) {
+        if (!isLoggingEnabled) return
+
+        val logTag = customTag ?: tag
+        val formattedJson = formatJson(jsonString)
+
+        if (formattedJson != null) {
+            val prefix = if (message != null) {
+                "${getCallerInfo()} $message - JSON ▼"
+            } else {
+                "${getCallerInfo()} JSON ▼"
+            }
+
+            // 첫 줄 (헤더)
+            Log.d(logTag, prefix)
+
+            // JSON 내용 (한 줄에 여러 줄 표시)
+            Log.d(logTag, formattedJson)
+
+            // 파일에도 기록
+            logFile?.let {
+                writeLogToFile("$prefix\n$formattedJson", logTag)
+            }
+        } else {
+            // JSON 파싱 실패 시 원본 그대로 출력
+            val errorMsg = "${getCallerInfo()} Invalid JSON (showing raw): $jsonString"
+            Log.w(logTag, errorMsg)
+            logFile?.let {
+                writeLogToFile(errorMsg, logTag)
+            }
+        }
+    }
+
+    private fun formatJson(jsonString: String): String? {
+        return try {
+            val json = jsonString.trim()
+
+            if (json.isEmpty()) return null
+
+            val result = StringBuilder()
+            var indentLevel = 0
+            var inString = false
+            var escapeNext = false
+
+            for (i in json.indices) {
+                val char = json[i]
+
+                when {
+                    escapeNext -> {
+                        result.append(char)
+                        escapeNext = false
+                    }
+                    char == '\\' -> {
+                        result.append(char)
+                        escapeNext = true
+                    }
+                    char == '"' -> {
+                        result.append(char)
+                        inString = !inString
+                    }
+                    !inString -> {
+                        when (char) {
+                            '{', '[' -> {
+                                result.append(char)
+                                result.append('\n')
+                                indentLevel++
+                                result.append("  ".repeat(indentLevel))
+                            }
+                            '}', ']' -> {
+                                result.append('\n')
+                                indentLevel--
+                                result.append("  ".repeat(indentLevel))
+                                result.append(char)
+                            }
+                            ',' -> {
+                                result.append(char)
+                                result.append('\n')
+                                result.append("  ".repeat(indentLevel))
+                            }
+                            ':' -> {
+                                result.append(char)
+                                result.append(' ')
+                            }
+                            ' ', '\n', '\r', '\t' -> {
+                                // 공백 무시
+                            }
+                            else -> result.append(char)
+                        }
+                    }
+                    else -> result.append(char)
+                }
+            }
+
+            result.toString()
+        } catch (e: Exception) {
+            null
         }
     }
 }

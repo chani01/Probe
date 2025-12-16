@@ -33,7 +33,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Probe.i(name)
-    Probe.tag("ui").i("aaa")
+
+    val jsonString = """{"name":"John","age":30,"address":{"city":"Seoul","zip":"12345"}}"""
+    Probe.json(jsonString)
+
     Text(
         text = "Hello $name!",
         modifier = modifier
