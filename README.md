@@ -1,13 +1,18 @@
-# Android Log Library
+# Prode
 
-An easy-to-use and powerful logging library for Android applications. Simplify your debugging process with customizable and efficient logging features.
+An easy-to-use and powerful Android logging library with a fluent tag API.
+Prode helps you write clean, readable logs with support for trace logging,
+JSON formatting, and optional file persistence.
 
 ---
 
 ## 🌟 Features
+
 - **Simple API**: Minimal setup with intuitive method calls.
-- **Customizable Tags**: Easily set default tags for better log organization.
-- **Log Levels**: Supports various log levels (`DEBUG`, `INFO`, `WARN`, `ERROR`, `TRACE`).
+- **Default Tag Support**: Set a global default tag for all logs.
+- **Fluent Tag API**: Chain custom tags using `tag()` for clean and readable logging.
+- **Log Levels**: Supports `DEBUG`, `INFO`, `WARN`, `ERROR`, and `TRACE`.
+- **JSON Logging**: Pretty-print JSON strings or objects for better readability.
 - **File Logging**: Optionally persist logs to a file for debugging.
 - **Flexible Logging Control**: Enable or disable logging dynamically using `isLoggingEnabled`.
 
@@ -15,67 +20,94 @@ An easy-to-use and powerful logging library for Android applications. Simplify y
 
 ## 🚀 Installation
 
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/chani01/LogCatX?label=Latest%20Version)](https://github.com/chani01/LogCatX/releases)
+```gradle
+dependencies {
+    implementation "com.github.chani01:Prode:<latest_version>"
+}
+```
 
-1. **Add the dependency** to your `build.gradle` file:
-   ```gradle
-   dependencies {
-       implementation 'com.github.chani01:LogCatX:<latest_version>'
-   }
-   ```
-
-2. **Sync the project**.
+Sync your project after adding the dependency.
 
 ---
 
 ## 📖 Usage
 
 ### Initialization
-You can initialize `Dlog` in your `Application` class or any entry point of your app:
+
+Initialize `Prode` in your `Application` class or any entry point:
 
 ```kotlin
-Dlog.init(
-    defaultTag = "MyAppTag",  // Default tag for all logs
-    isLoggingEnabled = BuildConfig.DEBUG,  // Enable or disable logging dynamically
-    logFileName = "app_logs.txt"  // File name for log persistence (optional)
+Prode.init(
+    defaultTag = "MyAppTag",
+    isLoggingEnabled = BuildConfig.DEBUG,
+    logFileName = "app_logs.txt" // optional
 )
 ```
 
-### Explanation of Parameters
-- **`defaultTag`**: The default tag used in all log messages.
-- **`isLoggingEnabled`**: Controls whether logging is active:
-  - `true`: Enables logging.
-  - `false`: Disables logging (e.g., in Release mode).
-- **`logFileName`**: (Optional) Specifies the file to save logs for debugging purposes.
+#### Parameters
+- **`defaultTag`**: Default tag used when no custom tag is provided.
+- **`isLoggingEnabled`**: Enables or disables logging dynamically.
+- **`logFileName`**: (Optional) File name for saving logs.
 
 ---
 
 ### Basic Logging
-After initialization, use the following methods for logging:
 
 ```kotlin
-Dlog.d("This is a debug message")    // Debug log
-Dlog.i("This is an info message")    // Info log
-Dlog.w("This is a warning")          // Warning log
-Dlog.e("This is an error message")   // Error log
-Dlog.t("This is a trace log")        // Trace log
+Prode.d("This is a debug message")
+Prode.i("This is an info message")
+Prode.w("This is a warning")
+Prode.e("This is an error message")
+Prode.t("This is a trace log")
 ```
 
 ---
 
+### Custom Tag Logging
+
+Use the fluent `tag()` API to override the default tag per log:
+
+```kotlin
+Prode.tag("MainActivity").d("Activity started")
+Prode.tag("Network").e("API request failed")
+```
+
+If no tag is specified, the default tag is used.
+
+---
+
+### JSON Logging
+
+Prode supports logging JSON content in a readable, pretty-printed format.
+
+```kotlin
+val jsonString = """
+{
+  "id": 1,
+  "name": "Prode",
+  "enabled": true
+}
+"""
+
+Prode.json(jsonString)
+Prode.tag("Response").json(jsonString)
+```
+
+JSON output is automatically formatted for improved readability in Logcat.
+
+---
 
 ## 🛠 Configuration Example
-
-Here’s how you might configure `Dlog` in your `Application` class:
 
 ```kotlin
 class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
-        Dlog.init(
+
+        Prode.init(
             defaultTag = "MyAppTag",
-            isLoggingEnabled = BuildConfig.DEBUG,  // Automatically enable or disable logging
-            logFileName = "app_logs.txt"  // Save logs in Debug mode
+            isLoggingEnabled = BuildConfig.DEBUG,
+            logFileName = "app_logs.txt"
         )
     }
 }
@@ -83,21 +115,23 @@ class MyApp : Application() {
 
 ---
 
-## 🛡️ Log in Release Builds
+## 🛡️ Logging in Release Builds
 
-For release builds, ensure logging is automatically disabled for performance and security:
+For release builds, logging should be disabled for performance and security.
 
-- **Debug Mode**: Logs are enabled for thorough testing.
-- **Release Mode**: Logs are suppressed for performance and security by setting `isLoggingEnabled` to `false`.
+- **Debug builds**: Logging enabled.
+- **Release builds**: Logging disabled by setting `isLoggingEnabled = false`.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
+See the [LICENSE](LICENSE) file for details.
 
 ---
 
 ## 🙌 Contributions
 
-Contributions are welcome! Feel free to open issues, submit pull requests, or suggest new features. 😊
+Contributions are welcome!
+Feel free to open issues, submit pull requests, or suggest improvements.
