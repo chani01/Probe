@@ -1,7 +1,7 @@
-# Prode
+# Probe
 
 An easy-to-use and powerful Android logging library with a fluent tag API.
-Prode helps you write clean, readable logs with support for trace logging,
+Probe helps you write clean, readable logs with support for trace logging,
 JSON formatting, and optional file persistence.
 
 ---
@@ -22,7 +22,7 @@ JSON formatting, and optional file persistence.
 
 ```gradle
 dependencies {
-    implementation "com.github.chani01:Prode:<latest_version>"
+    implementation "com.github.chani01:Probe:<latest_version>"
 }
 ```
 
@@ -34,10 +34,10 @@ Sync your project after adding the dependency.
 
 ### Initialization
 
-Initialize `Prode` in your `Application` class or any entry point:
+Initialize `Probe` in your `Application` class or any entry point:
 
 ```kotlin
-Prode.init(
+Probe.init(
     defaultTag = "MyAppTag",
     isLoggingEnabled = BuildConfig.DEBUG,
     logFileName = "app_logs.txt" // optional
@@ -54,11 +54,11 @@ Prode.init(
 ### Basic Logging
 
 ```kotlin
-Prode.d("This is a debug message")
-Prode.i("This is an info message")
-Prode.w("This is a warning")
-Prode.e("This is an error message")
-Prode.t("This is a trace log")
+Probe.d("This is a debug message")
+Probe.i("This is an info message")
+Probe.w("This is a warning")
+Probe.e("This is an error message")
+Probe.t("This is a trace log")
 ```
 
 ---
@@ -68,8 +68,8 @@ Prode.t("This is a trace log")
 Use the fluent `tag()` API to override the default tag per log:
 
 ```kotlin
-Prode.tag("MainActivity").d("Activity started")
-Prode.tag("Network").e("API request failed")
+Probe.tag("MainActivity").d("Activity started")
+Probe.tag("Network").e("API request failed")
 ```
 
 If no tag is specified, the default tag is used.
@@ -78,19 +78,19 @@ If no tag is specified, the default tag is used.
 
 ### JSON Logging
 
-Prode supports logging JSON content in a readable, pretty-printed format.
+Probe supports logging JSON content in a readable, pretty-printed format.
 
 ```kotlin
 val jsonString = """
 {
   "id": 1,
-  "name": "Prode",
+  "name": "Probe",
   "enabled": true
 }
 """
 
-Prode.json(jsonString)
-Prode.tag("Response").json(jsonString)
+Probe.json(jsonString)
+Probe.tag("Response").json(jsonString)
 ```
 
 JSON output is automatically formatted for improved readability in Logcat.
@@ -104,7 +104,7 @@ class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        Prode.init(
+        Probe.init(
             defaultTag = "MyAppTag",
             isLoggingEnabled = BuildConfig.DEBUG,
             logFileName = "app_logs.txt"
