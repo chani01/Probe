@@ -38,7 +38,7 @@ Initialize `Probe` in your `Application` class or any entry point:
 
 ```kotlin
 Probe.init(
-    defaultTag = "MyAppTag",
+    tag = "MyAppTag",
     isLoggingEnabled = BuildConfig.DEBUG,
     logFile = null // optional
 )
@@ -136,7 +136,7 @@ class MyApp : Application() {
         super.onCreate()
 
         Probe.init(
-            defaultTag = "Probe",
+            tag = "Probe",
             isLoggingEnabled = BuildConfig.DEBUG,
             logFile = null
         )
