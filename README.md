@@ -40,14 +40,14 @@ Initialize `Probe` in your `Application` class or any entry point:
 Probe.init(
     defaultTag = "MyAppTag",
     isLoggingEnabled = BuildConfig.DEBUG,
-    logFile = File(applicationContext.filesDir, filename) or null // optional
+    logFile = null // optional
 )
 ```
 
 #### Parameters
 - **`defaultTag`**: Default tag used when no custom tag is provided.
 - **`isLoggingEnabled`**: Enables or disables logging dynamically.
-- **`logFileName`**: (Optional) File name for saving logs.
+- **`logFile`**: (Optional) File name for saving logs.
 
 ---
 
@@ -94,6 +94,19 @@ Probe.tag("Response").json(jsonString)
 ```
 
 JSON output is automatically formatted for improved readability in Logcat.
+
+---
+
+### File Logging
+
+Probe writes logs using append mode.
+Logs persist across app restarts unless the file is manually cleared.
+
+```kotlin
+Probe.init(
+    logFile = File(applicationContext.filesDir, "probe.txt")
+)
+```
 
 ---
 
