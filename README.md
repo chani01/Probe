@@ -59,7 +59,6 @@ Probe.i("This is an info message")
 Probe.w("This is a warning")
 Probe.e("This is an error message")
 Probe.t("This is a trace log")
-Probe.json("This is a json log")
 ```
 
 ---
