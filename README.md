@@ -20,6 +20,17 @@ JSON formatting, and optional file persistence.
 
 ## 🚀 Installation
 
+### 1. Add JitPack repository
+
+```gradle
+dependencyResolutionManagement {
+    repositories {
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+```
+
+### 2. Add dependency
 ```gradle
 dependencies {
     implementation "com.github.chani01:Probe:<latest_version>"
