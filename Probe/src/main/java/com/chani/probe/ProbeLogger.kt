@@ -28,7 +28,11 @@ class ProbeLogger internal constructor(private val customTag: String) {
         Probe.getInstance()?.logTrace(message, customTag)
     }
 
-    fun json(jsonString: String) {
-        Probe.getInstance()?.logJson(jsonString, customTag)
+    fun json(jsonString: String, level: Int = Log.DEBUG) {
+        Probe.getInstance()?.logJson(
+            jsonString = jsonString,
+            customTag = customTag,
+            level = level
+        )
     }
 }

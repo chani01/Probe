@@ -39,7 +39,7 @@ internal object JsonFormatter {
                             }
                             '}', ']' -> {
                                 result.append('\n')
-                                indentLevel--
+                                indentLevel = maxOf(0, indentLevel - 1)
                                 result.append("  ".repeat(indentLevel))
                                 result.append(char)
                             }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import com.chani.probe.Probe
 import com.chani.probesample.ui.theme.ProbeSampleTheme
@@ -32,13 +33,15 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Probe.i(name)
-    Probe.tag("ui").i("aaa")
+    LaunchedEffect(Unit) {
+        Probe.i(name)
+        Probe.tag("ui").i("aaa")
 
-    val jsonString = """{"name":"John","age":30,"address":{"city":"Seoul","zip":"12345"}}"""
-    Probe.json(jsonString)
+        val jsonString = """{"name":"John","age":30,"address":{"city":"Seoul","zip":"12345"}}"""
+        Probe.json(jsonString)
 
-    Probe.t(name)
+        Probe.t(name)
+    }
 
     Text(
         text = "Hello $name!",

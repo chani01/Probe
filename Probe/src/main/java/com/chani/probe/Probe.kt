@@ -1,11 +1,16 @@
 package com.chani.probe
 
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.chani.probe.internal.JsonFormatter
 import com.chani.probe.internal.StackTraceUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.io.File
 import java.io.FileWriter
 import java.io.PrintWriter
@@ -18,19 +23,57 @@ class Probe private constructor(
     private val logFile: File? = null
 )  {
 
+    private val ioScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val fileMutex = Mutex()
+
     companion object {
         @Volatile
         private var instance: Probe? = null
 
+        /**
+         * Initializes Probe with the given configuration and returns the singleton instance.
+         *
+         * If Probe is already initialized, the existing instance is returned as-is.
+         * Re-initialization is not supported once Probe has been set up.
+         * Call [shutdown] first if reconfiguration is needed.
+         *
+         * @param tag Default tag used in log output.
+         * @param isLoggingEnabled Set to false to suppress all logs (e.g. release builds).
+         * @param logFile Optional file to persist logs. If null, file logging is disabled.
+         */
         fun init(
             tag: String = "Probe",
             isLoggingEnabled: Boolean = true,
             logFile: File? = null
         ) : Probe {
-            return instance ?: synchronized(this) {
+            return instance?.also {
+                Log.w("Probe", "Probe is already initialized. Subsequent init() call is ignored.")
+            } ?: synchronized(this) {
                 instance ?: Probe(tag, isLoggingEnabled, logFile).also { instance = it }
             }
         }
+
+        /**
+         * Reset instance (for testing purposes only)
+         */
+        @VisibleForTesting
+        internal fun reset() {
+            synchronized(this) {
+                instance = null
+            }
+        }
+
+        /**
+         * Cancels all pending IO coroutines and clears the singleton instance.
+         * Call from Application.onTerminate() or test @After teardown.
+         */
+        fun shutdown() {
+            synchronized(this) {
+                instance?.ioScope?.cancel()  // IO 코루틴 전부 취소
+                instance = null              // 싱글톤 초기화
+            }
+        }
+
 
         /**
          * Get current Probe instance (for internal use)
@@ -68,45 +111,54 @@ class Probe private constructor(
             instance?.logTrace(message, null)
         }
 
-        fun json(jsonString: String) {
-            instance?.logJson(jsonString, null)
+        fun json(jsonString: String, level: Int = Log.DEBUG) {
+            instance?.logJson(
+                jsonString = jsonString,
+                customTag =  null,
+                level = level
+            )
         }
     }
 
 
     internal fun log(level: Int, message: String, customTag: String? = null) {
         if (isLoggingEnabled) {
-            val logMsg = StackTraceUtil.buildMessage(message = message, 6)
+            val logMsg = StackTraceUtil.buildMessage(message = message)
             val logTag = customTag ?: tag
             Log.println(level, logTag, logMsg)
-            logFile?.let {
-                writeLogToFile(logMsg, logTag)
-            }
+            logFile?.let { writeLogToFile(logMsg, logTag, it) }
         }
     }
 
-    private fun writeLogToFile(log: String, logTag: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                FileWriter(logFile, true).use { fw ->
-                    PrintWriter(fw).use { pw ->
-                        pw.println("[$logTag] $log")
+    private fun writeLogToFile(log: String, logTag: String, file: File) {
+        ioScope.launch {
+            fileMutex.withLock {
+                try {
+                    FileWriter(file, true).use { fw ->
+                        PrintWriter(fw).use { pw ->
+                            pw.println("[$logTag] $log")
+                        }
                     }
+                } catch (e: Exception) {
+                    Log.e(tag, "Log file write failed", e)
                 }
-            } catch (e: Exception) {
-                Log.e(tag, "Log file write failed", e)
             }
         }
     }
 
-    internal fun logJson(jsonString: String, customTag: String? = null, message: String? = null) {
+    internal fun logJson(
+        jsonString: String,
+        customTag: String? = null,
+        message: String? = null,
+        level: Int = Log.DEBUG
+    ) {
         if (!isLoggingEnabled) return
 
         val logTag = customTag ?: tag
         val formattedJson = JsonFormatter.format(jsonString)
 
         if (formattedJson != null) {
-            val callerInfo = StackTraceUtil.getCallerInfo(6)
+            val callerInfo = StackTraceUtil.getCallerInfo()
 
             val prefix = if (message != null) {
                 "$callerInfo $message - JSON ▼"
@@ -115,23 +167,19 @@ class Probe private constructor(
             }
 
             // 첫 줄 (헤더)
-            Log.d(logTag, prefix)
+            Log.println(level, logTag, prefix)
 
             // JSON 내용 (한 줄에 여러 줄 표시)
-            Log.d(logTag, formattedJson)
+            Log.println(level, logTag, formattedJson)
 
             // 파일에도 기록
-            logFile?.let {
-                writeLogToFile("$prefix\n$formattedJson", logTag)
-            }
+            logFile?.let { writeLogToFile("$prefix\n$formattedJson", logTag, it) }
         } else {
             // JSON 파싱 실패 시 원본 그대로 출력
-            val callerInfo = StackTraceUtil.getCallerInfo(6)
+            val callerInfo = StackTraceUtil.getCallerInfo()
             val errorMsg = "$callerInfo Invalid JSON (showing raw): $jsonString"
             Log.w(logTag, errorMsg)
-            logFile?.let {
-                writeLogToFile(errorMsg, logTag)
-            }
+            logFile?.let { writeLogToFile(errorMsg, logTag, it) }
         }
     }
 
@@ -152,16 +200,8 @@ class Probe private constructor(
 
             // Probe 내부, 시스템, 프레임워크 제외
             if (!className.startsWith("com.chani.probe.") &&
-                !className.startsWith("dalvik.") &&
-                !className.startsWith("java.") &&  // java.* 전체 제외
-                !className.startsWith("javax.") &&
-                !className.startsWith("android.") &&
-                !className.startsWith("androidx.") &&
-                !className.startsWith("com.android.") &&  // com.android.* 추가
-                !className.startsWith("kotlin.") &&
-                !className.startsWith("kotlinx.") &&
                 fileName != null &&
-                !fileName.endsWith(".jvm.kt")) {
+                !StackTraceUtil.isSystemOrFrameworkClass(className, fileName)) {
                 sb.append("   → $fileName:${element.lineNumber} ${element.methodName}()\n")
             }
         }
@@ -172,8 +212,6 @@ class Probe private constructor(
         Log.d(logTag, sb.toString())
 
         // 파일에도 기록
-        logFile?.let {
-            writeLogToFile(sb.toString(), logTag)
-        }
+        logFile?.let { writeLogToFile(sb.toString(), logTag, it) }
     }
 }

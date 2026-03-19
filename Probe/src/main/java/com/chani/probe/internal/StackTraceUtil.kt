@@ -4,7 +4,7 @@ import android.util.Log
 
 internal object StackTraceUtil {
 
-    fun getCallerInfo(stackOffset: Int = 8): String {
+    fun getCallerInfo(): String {
         val stackTrace = Thread.currentThread().stackTrace
         
         for (element in stackTrace) {
@@ -46,7 +46,7 @@ internal object StackTraceUtil {
     /**
      * 시스템/프레임워크 클래스인지 확인
      */
-    private fun isSystemOrFrameworkClass(className: String, fileName: String): Boolean {
+    internal fun isSystemOrFrameworkClass(className: String, fileName: String): Boolean {
         // 패키지명 기반 필터
         if (className.startsWith("android.") ||
             className.startsWith("androidx.") ||
@@ -77,7 +77,7 @@ internal object StackTraceUtil {
                 methodName.startsWith("invoke\$")
     }
 
-    fun buildMessage(message: String, stackOffset: Int): String {
-        return "${getCallerInfo(stackOffset)}\n   ↳ $message"
+    fun buildMessage(message: String): String {
+        return "${getCallerInfo()}\n   ↳ $message"
     }
 }
