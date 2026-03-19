@@ -61,6 +61,8 @@ Probe.init(
 - **`logFile`**: (Optional) File where logs will be written.  
   If `null`, file logging is disabled.
 
+> **Note:** `init()` is designed to be called once. Subsequent calls are ignored and a warning is logged.
+
 ---
 
 ### Basic Logging
@@ -118,7 +120,7 @@ val jsonString = """
 """
 
 Probe.json(jsonString)
-Probe.tag("Response").json(jsonString)
++Probe.tag("API").json(jsonString, Log.WARN)
 ```
 
 JSON output is automatically formatted for improved readability in Logcat.
