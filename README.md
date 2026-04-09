@@ -120,7 +120,7 @@ val jsonString = """
 """
 
 Probe.json(jsonString)
-+Probe.tag("API").json(jsonString, Log.WARN)
+Probe.tag("API").json(jsonString, Log.WARN)
 ```
 
 JSON output is automatically formatted for improved readability in Logcat.
